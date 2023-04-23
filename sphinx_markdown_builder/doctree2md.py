@@ -309,11 +309,6 @@ class Translator(nodes.NodeVisitor):
         self.settings = settings = document.settings
         lcode = settings.language_code
         self.language = languages.get_language(lcode, document.reporter)
-        # Not-None here indicates Markdown should use HTTP for internal and
-        # download links.
-        self.markdown_http_base = (
-            builder.markdown_http_base if builder else None
-        )
         # Warn only once per writer about unsupported elements
         self._warned = set()
         # Lookup table to get section list from name
@@ -322,6 +317,12 @@ class Translator(nodes.NodeVisitor):
         self.reset()
         # Attribute shortcuts
         self.head, self.body, self.foot = self._lists.values()
+
+    @property
+    def markdown_http_base(self):
+        if self.builder is None:
+            return None
+        return self.builder.config.markdown_http_base
 
     def reset(self):
         """Initialize object for fresh read."""

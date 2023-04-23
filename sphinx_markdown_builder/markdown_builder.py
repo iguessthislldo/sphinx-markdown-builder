@@ -14,13 +14,10 @@ class MarkdownBuilder(Builder):
     format = 'markdown'
     epilog = __('The markdown files are in %(outdir)s.')
 
-    out_suffix = '.md'
     allow_parallel = True
     default_translator_class = MarkdownTranslator
 
     current_docname = None
-
-    markdown_http_base = 'https://localhost'
 
     def init(self):
         self.secnumbers = {}
@@ -30,7 +27,7 @@ class MarkdownBuilder(Builder):
             if docname not in self.env.all_docs:
                 yield docname
                 continue
-            targetname = path.join(self.outdir, docname + self.out_suffix)
+            targetname = path.join(self.outdir, docname + self.config.markdown_ext)
             try:
                 targetmtime = path.getmtime(targetname)
             except Exception:
@@ -44,7 +41,10 @@ class MarkdownBuilder(Builder):
 
     def get_target_uri(self, docname: str, typ=None):
         # Returns the target markdown file name
-        return f"{docname}.md"
+        ext = self.config.markdown_target_ext
+        if ext is None:
+          ext = self.config.markdown_ext
+        return docname + ext
 
     def prepare_writing(self, docnames):
         self.writer = MarkdownWriter(self)
@@ -56,7 +56,7 @@ class MarkdownBuilder(Builder):
         self.writer.write(doctree, destination)
         outfilename = path.join(
             self.outdir,
-            os_path(docname) + self.out_suffix
+            os_path(docname) + self.config.markdown_ext
         )
         ensuredir(path.dirname(outfilename))
         try:
